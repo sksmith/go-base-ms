@@ -2,7 +2,7 @@
 FROM alpine:3.22
 
 # Update and install runtime dependencies
-RUN apk update && apk upgrade && apk add --no-cache ca-certificates tzdata librdkafka
+RUN apk update && apk upgrade && apk add --no-cache ca-certificates tzdata librdkafka wget
 
 # Create non-root user
 RUN addgroup -g 1000 -S appgroup && \
