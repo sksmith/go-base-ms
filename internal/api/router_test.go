@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dks0523168/go-base-ms/internal/health"
-	internalLogger "github.com/dks0523168/go-base-ms/internal/logger"
+	"github.com/sksmith/go-base-ms/internal/health"
+	internalLogger "github.com/sksmith/go-base-ms/internal/logger"
 )
 
 type mockChecker struct {

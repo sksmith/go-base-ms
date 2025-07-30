@@ -12,7 +12,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry"
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde"
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde/avro"
-	"github.com/dks0523168/go-base-ms/internal/config"
+	"github.com/sksmith/go-base-ms/internal/config"
 )
 
 type Client struct {

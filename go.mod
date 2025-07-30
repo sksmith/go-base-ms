@@ -1,4 +1,4 @@
-module github.com/dks0523168/go-base-ms
+module github.com/sksmith/go-base-ms
 
 go 1.24.2
 

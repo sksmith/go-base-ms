@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dks0523168/go-base-ms/internal/config"
+	"github.com/sksmith/go-base-ms/internal/config"
 )
 
 func TestNew_InvalidDSN(t *testing.T) {

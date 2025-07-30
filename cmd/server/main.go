@@ -9,13 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dks0523168/go-base-ms/internal/api"
-	"github.com/dks0523168/go-base-ms/internal/config"
-	"github.com/dks0523168/go-base-ms/internal/db"
-	"github.com/dks0523168/go-base-ms/internal/health"
-	"github.com/dks0523168/go-base-ms/internal/kafka"
-	"github.com/dks0523168/go-base-ms/internal/logger"
-	"github.com/dks0523168/go-base-ms/internal/version"
+	"github.com/sksmith/go-base-ms/internal/api"
+	"github.com/sksmith/go-base-ms/internal/config"
+	"github.com/sksmith/go-base-ms/internal/db"
+	"github.com/sksmith/go-base-ms/internal/health"
+	"github.com/sksmith/go-base-ms/internal/kafka"
+	"github.com/sksmith/go-base-ms/internal/logger"
+	"github.com/sksmith/go-base-ms/internal/version"
 )
 
 // Build information set by GoReleaser

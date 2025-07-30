@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dks0523168/go-base-ms/internal/health"
-	"github.com/dks0523168/go-base-ms/internal/logger"
-	"github.com/dks0523168/go-base-ms/internal/version"
+	"github.com/sksmith/go-base-ms/internal/health"
+	"github.com/sksmith/go-base-ms/internal/logger"
+	"github.com/sksmith/go-base-ms/internal/version"
 )
 
 type Router struct {

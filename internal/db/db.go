@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dks0523168/go-base-ms/internal/config"
+	"github.com/sksmith/go-base-ms/internal/config"
 	_ "github.com/lib/pq"
 )
 

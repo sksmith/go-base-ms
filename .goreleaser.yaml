@@ -29,10 +29,10 @@ builds:
       - -X main.Commit={{.FullCommit}}
       - -X main.Date={{.Date}}
       - -X main.BuiltBy=goreleaser
-      - -X github.com/dks0523168/go-base-ms/internal/version.Version={{.Version}}
-      - -X github.com/dks0523168/go-base-ms/internal/version.Commit={{.FullCommit}}
-      - -X github.com/dks0523168/go-base-ms/internal/version.Date={{.Date}}
-      - -X github.com/dks0523168/go-base-ms/internal/version.BuiltBy=goreleaser
+      - -X github.com/sksmith/go-base-ms/internal/version.Version={{.Version}}
+      - -X github.com/sksmith/go-base-ms/internal/version.Commit={{.FullCommit}}
+      - -X github.com/sksmith/go-base-ms/internal/version.Date={{.Date}}
+      - -X github.com/sksmith/go-base-ms/internal/version.BuiltBy=goreleaser
     tags:
       - netgo
       - osusergo

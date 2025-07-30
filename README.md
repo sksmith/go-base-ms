@@ -15,7 +15,7 @@ A comprehensive Go microservice template with customizable dependencies and auto
 ### 1. Clone and Initialize
 
 ```bash
-git clone https://github.com/your-username/go-base-ms.git my-new-service
+git clone https://github.com/sksmith/go-base-ms.git my-new-service
 cd my-new-service
 ./scripts/init-project.sh
 ```
