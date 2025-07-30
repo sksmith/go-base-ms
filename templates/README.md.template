@@ -2,6 +2,23 @@
 
 PROJECT_DESCRIPTION
 
+## Features
+
+- **Production Ready**: Kubernetes health checks, structured logging, and graceful shutdown
+- **OpenAPI Documentation**: Comprehensive API specification with interactive docs
+- **Observability**: Health monitoring, structured logging with dynamic level control
+- **Container Ready**: Multi-stage Docker builds and Docker Compose development environment
+- **Release Management**: Automated versioning and releases with GoReleaser
+{{#USE_POSTGRES}}
+- **PostgreSQL Integration**: Connection pooling, health checks, and configuration management
+{{/USE_POSTGRES}}
+{{#USE_KAFKA}}
+- **Kafka Messaging**: Producer/consumer patterns with SASL/SSL support and delivery guarantees
+{{#USE_SCHEMA_REGISTRY}}
+- **Schema Registry**: Avro serialization with automatic schema evolution and compatibility
+{{/USE_SCHEMA_REGISTRY}}
+{{/USE_KAFKA}}
+
 ## Project Structure
 
 ```
@@ -36,15 +53,16 @@ PROJECT_DESCRIPTION
 
 ### Prerequisites
 
-- Go 1.24 or higher
-- Docker (optional)
+- **Go 1.21+**: Required for building and running the application
+- **Docker**: For containerized development and deployment
+- **Make**: For running development tasks
 {{#USE_POSTGRES}}
-- PostgreSQL (for local development)
+- **PostgreSQL**: Database server for local development
 {{/USE_POSTGRES}}
 {{#USE_KAFKA}}
-- Kafka (for local development)
+- **Apache Kafka**: Message broker for event streaming
 {{#USE_SCHEMA_REGISTRY}}
-- Schema Registry (for Avro serialization)
+- **Confluent Schema Registry**: Schema management for Avro serialization
 {{/USE_SCHEMA_REGISTRY}}
 {{/USE_KAFKA}}
 
@@ -56,12 +74,19 @@ git clone <repository-url>
 cd PROJECT_NAME
 ```
 
-2. Install dependencies:
+2. Install Go dependencies:
 ```bash
 make deps
 ```
 
-3. Build the application:
+3. Set up your environment:
+```bash
+# Copy example environment file
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Build the application:
 ```bash
 make build
 ```
@@ -180,54 +205,82 @@ The database connection is available through the health check and can be extende
 
 {{/USE_POSTGRES}}
 {{#USE_KAFKA}}
-## Kafka Integration
+## Message Streaming with Kafka
 
-The service includes Kafka integration using Confluent's official Go client.
+This service integrates with Apache Kafka for reliable message streaming and event-driven architecture.
+
+### Architecture
+
+The Kafka integration provides:
+- **Producer Pattern**: Async message publishing with delivery guarantees
+- **Consumer Pattern**: Reliable message consumption with offset management
+- **Error Handling**: Dead letter queues and retry mechanisms
+- **Monitoring**: Producer/consumer metrics and health checks
 
 ### Configuration
 
-Kafka settings via environment variables:
+Configure Kafka connection via environment variables:
 
-- `KAFKA_BROKERS` - Comma-separated broker list (default: localhost:9092)
-- `KAFKA_TOPIC` - Default topic name (default: events)
-- `KAFKA_GROUP_ID` - Consumer group ID (default: PROJECT_NAME)
-- `KAFKA_SECURITY_PROTOCOL` - Security protocol (default: PLAINTEXT)
-- `KAFKA_SASL_MECHANISM` - SASL mechanism (PLAIN, SCRAM-SHA-256, etc.)
-- `KAFKA_SASL_USERNAME` - SASL username
-- `KAFKA_SASL_PASSWORD` - SASL password
+```bash
+# Broker Configuration
+KAFKA_BROKERS=localhost:9092              # Comma-separated broker list
+KAFKA_TOPIC=events                        # Default topic name
+KAFKA_GROUP_ID=PROJECT_NAME               # Consumer group ID
+
+# Security Configuration
+KAFKA_SECURITY_PROTOCOL=PLAINTEXT        # PLAINTEXT, SASL_PLAINTEXT, SASL_SSL, SSL
+KAFKA_SASL_MECHANISM=PLAIN               # PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+KAFKA_SASL_USERNAME=your-username        # SASL username
+KAFKA_SASL_PASSWORD=your-password        # SASL password
+```
 
 {{#USE_SCHEMA_REGISTRY}}
-### Schema Registry Configuration
+### Schema Registry Integration
 
-- `SCHEMA_REGISTRY_URL` - Registry endpoint (default: http://localhost:8081)
-- `SCHEMA_REGISTRY_USERNAME` - Basic auth username
-- `SCHEMA_REGISTRY_PASSWORD` - Basic auth password
-- `SCHEMA_REGISTRY_API_KEY` - API key authentication
-- `SCHEMA_REGISTRY_API_SECRET` - API secret authentication
+Avro serialization with automatic schema evolution:
 
-### Avro Support
+```bash
+# Schema Registry Configuration
+SCHEMA_REGISTRY_URL=http://localhost:8081 # Registry endpoint
+SCHEMA_REGISTRY_USERNAME=registry-user    # Basic auth username (optional)
+SCHEMA_REGISTRY_PASSWORD=registry-pass    # Basic auth password (optional)
+SCHEMA_REGISTRY_API_KEY=api-key          # API key auth (optional)
+SCHEMA_REGISTRY_API_SECRET=api-secret    # API secret auth (optional)
+```
 
-The service includes full Avro serialization support:
-- Automatic schema evolution
-- Backward/forward compatibility
-- Built-in serializer/deserializer
-- Schema Registry integration
+#### Schema Management
+
+- **Automatic Evolution**: Schemas evolve automatically with backward/forward compatibility
+- **Type Safety**: Strongly typed Go structs generated from Avro schemas  
+- **Version Control**: Schema versions managed centrally in Schema Registry
+- **Compatibility Checks**: Prevents breaking changes to message formats
+
+#### Usage Example
+
+```go
+// Define your Avro schema-compatible struct
+type UserEvent struct {
+    UserID    string    `avro:"user_id"`
+    Action    string    `avro:"action"`
+    Timestamp time.Time `avro:"timestamp"`
+}
+
+// Producer will automatically serialize to Avro
+producer.PublishUserEvent(UserEvent{
+    UserID:    "user123",
+    Action:    "login",
+    Timestamp: time.Now(),
+})
+```
 
 {{/USE_SCHEMA_REGISTRY}}
-### Features
+### Production Features
 
-The service automatically connects to:
-- **Kafka brokers** using Confluent's Go client with support for:
-  - SASL authentication (PLAIN, SCRAM-SHA-256, etc.)
-  - SSL/TLS encryption
-  - Producer with idempotence and delivery guarantees
-  - Consumer with automatic offset management
-{{#USE_SCHEMA_REGISTRY}}
-- **Schema Registry** for Avro serialization:
-  - Automatic schema evolution
-  - Backward/forward compatibility
-  - Built-in serializer/deserializer
-{{/USE_SCHEMA_REGISTRY}}
+- **Idempotent Producers**: Exactly-once delivery semantics
+- **Consumer Groups**: Horizontal scaling and load balancing
+- **Health Monitoring**: Built-in health checks for broker connectivity
+- **Graceful Shutdown**: Clean consumer group leaving and offset commits
+- **Error Recovery**: Automatic reconnection and retry logic
 
 {{/USE_KAFKA}}
 ## API Documentation
@@ -426,16 +479,3 @@ SCHEMA_REGISTRY_URL=http://localhost:8081
 {{/USE_SCHEMA_REGISTRY}}
 {{/USE_KAFKA}}
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Run the full test suite: `make test`
-6. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
