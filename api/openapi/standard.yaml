@@ -1,0 +1,89 @@
+paths:
+  /health/live:
+    get:
+      summary: Liveness probe
+      description: Kubernetes liveness probe endpoint
+      tags: [Health]
+      operationId: healthLive
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+
+  /health/ready:
+    get:
+      summary: Readiness probe
+      description: Kubernetes readiness probe endpoint
+      tags: [Health]
+      operationId: healthReady
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+
+  /version:
+    get:
+      summary: Get version information
+      description: Returns build version information including version, commit, and build date
+      tags: [Info]
+      operationId: getVersion
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfo'
+
+  /api/v1/admin/log-level:
+    get:
+      summary: Get current log level
+      description: Returns the current log level of the application
+      tags: [Admin]
+      operationId: getLogLevel
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogLevel'
+    
+    put:
+      summary: Change log level
+      description: Dynamically changes the log level of the application
+      tags: [Admin]
+      operationId: updateLogLevel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogLevelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogLevelResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "invalid log level: trace"

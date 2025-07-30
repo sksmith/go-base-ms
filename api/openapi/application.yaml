@@ -1,0 +1,57 @@
+paths:
+  /api/v1/hello:
+    get:
+      summary: Hello endpoint
+      description: Returns a hello message
+      tags: [API]
+      operationId: getHello
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello from Go Base Microservice
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  /api/v1/echo:
+    post:
+      summary: Echo endpoint
+      description: Echoes back the request body
+      tags: [API]
+      operationId: postEcho
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            example:
+              message: "Hello World"
+              data: { "key": "value" }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              example:
+                message: "Hello World"
+                data: { "key": "value" }
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid JSON body"

@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-base-ms
+  labels:
+    app: go-base-ms
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: go-base-ms
+  template:
+    metadata:
+      labels:
+        app: go-base-ms
+    spec:
+      containers:
+      - name: go-base-ms
+        image: go-base-ms:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: db.host
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: db.port
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: db.user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: db.password
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: db.name
+        - name: KAFKA_BROKERS
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: kafka.brokers
+        - name: KAFKA_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: kafka.topic
+        - name: KAFKA_GROUP_ID
+          value: "go-base-ms"
+        - name: KAFKA_SECURITY_PROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: kafka.security.protocol
+        - name: KAFKA_SASL_MECHANISM
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: kafka.sasl.mechanism
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: kafka.sasl.username
+              optional: true
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: kafka.sasl.password
+              optional: true
+        - name: SCHEMA_REGISTRY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: go-base-ms-config
+              key: schema.registry.url
+        - name: SCHEMA_REGISTRY_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: schema.registry.username
+              optional: true
+        - name: SCHEMA_REGISTRY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: schema.registry.password
+              optional: true
+        - name: SCHEMA_REGISTRY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: schema.registry.api.key
+              optional: true
+        - name: SCHEMA_REGISTRY_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: go-base-ms-secret
+              key: schema.registry.api.secret
+              optional: true
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-base-ms
+  labels:
+    app: go-base-ms
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: go-base-ms
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-base-ms-config
+data:
+  db.host: "postgres-service"
+  db.port: "5432"
+  db.name: "gobase"
+  kafka.brokers: "kafka-service:9092"
+  kafka.topic: "events"
+  kafka.security.protocol: "PLAINTEXT"
+  kafka.sasl.mechanism: ""
+  schema.registry.url: "http://schema-registry-service:8081"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: go-base-ms-secret
+type: Opaque
+stringData:
+  db.user: "postgres"
+  db.password: "changeme"
+  # Optional Kafka SASL credentials
+  # kafka.sasl.username: "kafka-user"
+  # kafka.sasl.password: "kafka-password"
+  # Optional Schema Registry credentials
+  # schema.registry.username: "sr-user"
+  # schema.registry.password: "sr-password"
+  # schema.registry.api.key: "sr-api-key"
+  # schema.registry.api.secret: "sr-api-secret"

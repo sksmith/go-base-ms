@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(go mod init:*)",
+      "Bash(mkdir:*)",
+      "Bash(go mod:*)",
+      "Bash(go test:*)",
+      "Bash(go get:*)",
+      "Bash(go build:*)",
+      "Bash(chmod:*)",
+      "Bash(go run:*)",
+      "Bash(./scripts/init-project.sh:*)",
+      "Bash(cp:*)",
+      "Bash(sed:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(rm:*)",
+      "Bash(true)",
+      "Bash(grep:*)",
+      "Bash(./scripts/merge-openapi.sh:*)",
+      "Bash(make:*)"
+    ],
+    "deny": []
+  }
+}

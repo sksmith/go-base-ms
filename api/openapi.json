@@ -1,0 +1,376 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Go Base Microservice",
+    "description": "A minimal Go microservice template with PostgreSQL, Kafka, and Kubernetes health endpoints",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "HealthCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "VersionInfo": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "v1.0.0"
+          },
+          "commit": {
+            "type": "string",
+            "example": "abc123def456"
+          },
+          "date": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00Z"
+          },
+          "built_by": {
+            "type": "string",
+            "example": "goreleaser"
+          }
+        }
+      },
+      "LogLevel": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error"
+            ],
+            "example": "info"
+          }
+        }
+      },
+      "LogLevelRequest": {
+        "type": "object",
+        "required": [
+          "level"
+        ],
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error"
+            ],
+            "example": "debug"
+          }
+        }
+      },
+      "LogLevelResponse": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "example": "debug"
+          },
+          "message": {
+            "type": "string",
+            "example": "Log level updated successfully"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Invalid request"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Info",
+      "description": "Information endpoints"
+    },
+    {
+      "name": "Admin",
+      "description": "Administrative endpoints"
+    },
+    {
+      "name": "API",
+      "description": "Application API endpoints"
+    }
+  ],
+  "paths": {
+    "/health/live": {
+      "get": {
+        "summary": "Liveness probe",
+        "description": "Kubernetes liveness probe endpoint",
+        "tags": [
+          "Health"
+        ],
+        "operationId": "healthLive",
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Readiness probe",
+        "description": "Kubernetes readiness probe endpoint",
+        "tags": [
+          "Health"
+        ],
+        "operationId": "healthReady",
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "summary": "Get version information",
+        "description": "Returns build version information including version, commit, and build date",
+        "tags": [
+          "Info"
+        ],
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/log-level": {
+      "get": {
+        "summary": "Get current log level",
+        "description": "Returns the current log level of the application",
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "getLogLevel",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogLevel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Change log level",
+        "description": "Dynamically changes the log level of the application",
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "updateLogLevel",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogLevelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogLevelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid log level: trace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hello": {
+      "get": {
+        "summary": "Hello endpoint",
+        "description": "Returns a hello message",
+        "tags": [
+          "API"
+        ],
+        "operationId": "getHello",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Hello from Go Base Microservice"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/echo": {
+      "post": {
+        "summary": "Echo endpoint",
+        "description": "Echoes back the request body",
+        "tags": [
+          "API"
+        ],
+        "operationId": "postEcho",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "example": {
+                "message": "Hello World",
+                "data": {
+                  "key": "value"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "example": {
+                  "message": "Hello World",
+                  "data": {
+                    "key": "value"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Invalid JSON body"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
