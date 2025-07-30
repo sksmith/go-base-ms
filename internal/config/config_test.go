@@ -14,14 +14,16 @@ func TestLoad(t *testing.T) {
 	}{
 		{
 			name:    "default values",
-			envVars: map[string]string{},
+			envVars: map[string]string{
+				"DB_PASSWORD": "", // Explicitly clear this env var
+			},
 			want: &Config{
 				Port: 8080,
 				Database: DatabaseConfig{
 					Host:            "localhost",
 					Port:            5432,
 					User:            "postgres",
-					Password:        "postgres",
+					Password:        "",
 					DBName:          "gobase",
 					SSLMode:         "disable",
 					MaxOpenConns:    25,
