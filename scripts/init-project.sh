@@ -52,7 +52,7 @@ check_prerequisites() {
     
     # Check Go version
     local go_version=$(go version | awk '{print $3}' | sed 's/go//')
-    local required_version="1.21"
+    local required_version="1.24"
     if ! printf '%s\n%s\n' "$required_version" "$go_version" | sort -C -V; then
         print_error "Go version $go_version is too old. Required: $required_version or higher"
         exit 1
