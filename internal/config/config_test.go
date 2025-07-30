@@ -21,7 +21,7 @@ func TestLoad(t *testing.T) {
 					Host:            "localhost",
 					Port:            5432,
 					User:            "postgres",
-					Password:        "",
+					Password:        "postgres",
 					DBName:          "gobase",
 					SSLMode:         "disable",
 					MaxOpenConns:    25,
