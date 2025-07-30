@@ -5,14 +5,13 @@
 
 set -e
 
-# Colors for output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# Source utility functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
 
 # Default values (set by init-project.sh)
 PROJECT_NAME="${PROJECT_NAME:-go-base-ms}"
+PROJECT_DISPLAY_NAME="${PROJECT_DISPLAY_NAME:-Go Base Microservice}"
 PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION:-A Go microservice built with go-base-ms template}"
 USE_POSTGRES="${USE_POSTGRES:-true}"
 USE_KAFKA="${USE_KAFKA:-true}"
@@ -27,6 +26,7 @@ echo "Template: $TEMPLATE_FILE"
 echo "Output: $OUTPUT_FILE"
 echo "Configuration:"
 echo "  PROJECT_NAME: $PROJECT_NAME"
+echo "  PROJECT_DISPLAY_NAME: $PROJECT_DISPLAY_NAME"
 echo "  PROJECT_DESCRIPTION: $PROJECT_DESCRIPTION"
 echo "  USE_POSTGRES: $USE_POSTGRES"
 echo "  USE_KAFKA: $USE_KAFKA"
@@ -44,6 +44,7 @@ process_template() {
     
     # Replace placeholders
     content="${content//PROJECT_NAME/$PROJECT_NAME}"
+    content="${content//PROJECT_DISPLAY_NAME/$PROJECT_DISPLAY_NAME}"
     content="${content//PROJECT_DESCRIPTION/$PROJECT_DESCRIPTION}"
     
     # Process conditional sections for PostgreSQL

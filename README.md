@@ -1,6 +1,6 @@
-# go-base-ms
+# User Management Service
 
-A minimal Go microservice template with PostgreSQL, Kafka, and Kubernetes health endpoints
+A service for managing user accounts
 
 ## Project Structure
 
@@ -14,43 +14,13 @@ A minimal Go microservice template with PostgreSQL, Kafka, and Kubernetes health
 │   ├── config/              # Configuration management
 │   ├── db/                  # Database connection and operations
 │   ├── health/              # Health check implementation
-│   ├── kafka/               # Kafka client implementation
-│   ├── logger/              # Structured logging setup
-│   └── version/             # Version information
-├── api/
-│   ├── openapi.yaml         # Generated OpenAPI specification
-│   ├── openapi.json         # Generated OpenAPI specification (JSON)
-│   └── openapi/             # OpenAPI specification sources
-│       ├── base.yaml        # Base specification with schemas and info
-│       ├── standard.yaml    # Standard endpoints (health, version, admin)
-│       └── application.yaml # Application-specific endpoints
-├── k8s/                     # Kubernetes manifests
-├── test/                    # Additional test files
-├── Dockerfile               # Multi-stage Docker build
-├── Makefile                 # Build and development tasks
-├── go.mod                   # Go module definition
-└── README.md                # This file
-```
 
-## Quick Start
-
-### Prerequisites
-
-- Go 1.24 or higher
-- Docker (optional)
-
-- PostgreSQL (for local development)
-
-
-- Kafka (for local development)
-
-- Schema Registry (for Avro serialization)
 ### Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd go-base-ms
+cd user-service
 ```
 
 2. Install dependencies:
@@ -100,10 +70,6 @@ This starts:
 - PostgreSQL on port 5432
 
 
-- Kafka on port 9092
-- Zookeeper on port 2181
-
-- Schema Registry on port 8081
 ## Available Endpoints
 
 ### Health Checks
@@ -171,53 +137,8 @@ The service connects to PostgreSQL using the following environment variables:
 ### Database Usage Example
 
 The database connection is available through the health check and can be extended for your application needs.
-## Kafka Integration
-
-The service includes Kafka integration using Confluent's official Go client.
-
-### Configuration
-
-Kafka settings via environment variables:
-
-- `KAFKA_BROKERS` - Comma-separated broker list (default: localhost:9092)
-- `KAFKA_TOPIC` - Default topic name (default: events)
-- `KAFKA_GROUP_ID` - Consumer group ID (default: go-base-ms)
-- `KAFKA_SECURITY_PROTOCOL` - Security protocol (default: PLAINTEXT)
-- `KAFKA_SASL_MECHANISM` - SASL mechanism (PLAIN, SCRAM-SHA-256, etc.)
-- `KAFKA_SASL_USERNAME` - SASL username
-- `KAFKA_SASL_PASSWORD` - SASL password
 
 
-### Schema Registry Configuration
-
-- `SCHEMA_REGISTRY_URL` - Registry endpoint (default: http://localhost:8081)
-- `SCHEMA_REGISTRY_USERNAME` - Basic auth username
-- `SCHEMA_REGISTRY_PASSWORD` - Basic auth password
-- `SCHEMA_REGISTRY_API_KEY` - API key authentication
-- `SCHEMA_REGISTRY_API_SECRET` - API secret authentication
-
-### Avro Support
-
-The service includes full Avro serialization support:
-- Automatic schema evolution
-- Backward/forward compatibility
-- Built-in serializer/deserializer
-- Schema Registry integration
-
-
-### Features
-
-The service automatically connects to:
-- **Kafka brokers** using Confluent's Go client with support for:
-  - SASL authentication (PLAIN, SCRAM-SHA-256, etc.)
-  - SSL/TLS encryption
-  - Producer with idempotence and delivery guarantees
-  - Consumer with automatic offset management
-
-- **Schema Registry** for Avro serialization:
-  - Automatic schema evolution
-  - Backward/forward compatibility
-  - Built-in serializer/deserializer
 ## API Documentation
 
 The service provides a comprehensive OpenAPI 3.0 specification using a modular approach:
@@ -293,22 +214,8 @@ make openapi
 - `DB_MAX_OPEN_CONNS` - Maximum open connections (default: 25)
 - `DB_MAX_IDLE_CONNS` - Maximum idle connections (default: 5)
 - `DB_CONN_MAX_LIFETIME` - Connection lifetime in minutes (default: 5)
-### Kafka Settings
-- `KAFKA_BROKERS` - Comma-separated broker list (default: localhost:9092)
-- `KAFKA_TOPIC` - Default topic name (default: events)
-- `KAFKA_GROUP_ID` - Consumer group ID (default: go-base-ms)
-- `KAFKA_SECURITY_PROTOCOL` - Security protocol (default: PLAINTEXT)
-- `KAFKA_SASL_MECHANISM` - SASL mechanism
-- `KAFKA_SASL_USERNAME` - SASL username
-- `KAFKA_SASL_PASSWORD` - SASL password
 
 
-### Schema Registry Settings
-- `SCHEMA_REGISTRY_URL` - Registry endpoint (default: http://localhost:8081)
-- `SCHEMA_REGISTRY_USERNAME` - Basic auth username
-- `SCHEMA_REGISTRY_PASSWORD` - Basic auth password
-- `SCHEMA_REGISTRY_API_KEY` - API key
-- `SCHEMA_REGISTRY_API_SECRET` - API secret
 ## Deployment
 
 ### Kubernetes
@@ -390,17 +297,10 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
-DB_NAME=go-base-ms
+DB_NAME=user-service
 DB_SSLMODE=disable
-# Kafka
-KAFKA_BROKERS=localhost:9092
-KAFKA_TOPIC=events
-KAFKA_GROUP_ID=go-base-ms
-KAFKA_SECURITY_PROTOCOL=PLAINTEXT
 
 
-# Schema Registry
-SCHEMA_REGISTRY_URL=http://localhost:8081
 ```
 
 ## Contributing

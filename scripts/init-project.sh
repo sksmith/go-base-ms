@@ -5,17 +5,13 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# Source utility functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
 
 # Global variables
-PROJECT_NAME=""
+PROJECT_NAME=""           # Technical name (kebab-case): go-base-ms
+PROJECT_DISPLAY_NAME=""   # Display name (Title Case): Go Base Microservice  
 PROJECT_DESCRIPTION=""
 GITHUB_USERNAME=""
 GITHUB_REPO=""
@@ -26,36 +22,6 @@ USE_SCHEMA_REGISTRY=false
 CREATE_GITHUB_REPO=false
 PRIVATE_REPO=false
 
-# Utility functions
-print_header() {
-    echo ""
-    echo -e "${PURPLE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║                                                            ║${NC}"
-    echo -e "${PURPLE}║               🚀 Go Microservice Generator 🚀              ║${NC}"
-    echo -e "${PURPLE}║                                                            ║${NC}"
-    echo -e "${PURPLE}║          Initialize your Go microservice project          ║${NC}"
-    echo -e "${PURPLE}║                                                            ║${NC}"
-    echo -e "${PURPLE}╚════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-}
-
-print_step() {
-    echo ""
-    echo -e "${CYAN}📋 $1${NC}"
-    echo "────────────────────────────────────────"
-}
-
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
 
 # Check prerequisites
 check_prerequisites() {
@@ -99,9 +65,9 @@ check_prerequisites() {
 collect_user_input() {
     print_step "Project Configuration"
     
-    # Project name
+    # Project name (technical name)
     while [[ -z "$PROJECT_NAME" ]]; do
-        echo -n -e "${BLUE}Enter project name (e.g., my-awesome-service): ${NC}"
+        echo -n -e "${BLUE}Enter project name (technical name, e.g., my-awesome-service): ${NC}"
         read -r PROJECT_NAME
         if [[ -z "$PROJECT_NAME" ]]; then
             print_warning "Project name cannot be empty"
@@ -110,6 +76,14 @@ collect_user_input() {
             PROJECT_NAME=""
         fi
     done
+    
+    # Auto-generate display name from project name
+    DEFAULT_DISPLAY_NAME=$(kebab_to_title "$PROJECT_NAME")
+    echo -n -e "${BLUE}Enter display name (default: $DEFAULT_DISPLAY_NAME): ${NC}"
+    read -r PROJECT_DISPLAY_NAME
+    if [[ -z "$PROJECT_DISPLAY_NAME" ]]; then
+        PROJECT_DISPLAY_NAME="$DEFAULT_DISPLAY_NAME"
+    fi
     
     # Project description
     echo -n -e "${BLUE}Enter project description (optional): ${NC}"
@@ -187,7 +161,8 @@ collect_user_input() {
     
     # Confirmation
     print_step "Configuration Summary"
-    echo -e "${CYAN}Project Name:${NC} $PROJECT_NAME"
+    echo -e "${CYAN}Technical Name:${NC} $PROJECT_NAME"
+    echo -e "${CYAN}Display Name:${NC} $PROJECT_DISPLAY_NAME"
     echo -e "${CYAN}Description:${NC} $PROJECT_DESCRIPTION"
     echo -e "${CYAN}Module Name:${NC} $MODULE_NAME"
     echo -e "${CYAN}PostgreSQL:${NC} $([ "$USE_POSTGRES" == true ] && echo "✅ Enabled" || echo "❌ Disabled")"
@@ -204,9 +179,9 @@ collect_user_input() {
     fi
 }
 
-# Update go.mod with new module name
+# Update go.mod with new module name and replace all hardcoded references
 update_go_mod() {
-    print_step "Updating Go module"
+    print_step "Updating Go module and replacing template references"
     
     # Update go.mod
     sed -i.bak "s|module github.com/dks0523168/go-base-ms|module $MODULE_NAME|g" go.mod
@@ -216,7 +191,25 @@ update_go_mod() {
     find . -name "*.go" -type f -exec sed -i.bak "s|github.com/dks0523168/go-base-ms|$MODULE_NAME|g" {} \;
     find . -name "*.go.bak" -delete
     
+    # Replace all instances of hardcoded GitHub username
+    find . -type f \( -name "*.go" -o -name "*.yaml" -o -name "*.yml" -o -name "*.md" -o -name "*.json" -o -name "Dockerfile*" \) \
+        -exec sed -i.bak "s/DKS0523168/$GITHUB_USERNAME/g" {} \;
+    find . -name "*.bak" -delete
+    
+    # Replace all instances of technical project name
+    find . -type f \( -name "*.go" -o -name "*.yaml" -o -name "*.yml" -o -name "*.md" -o -name "*.json" -o -name "Dockerfile*" -o -name "Makefile" \) \
+        -exec sed -i.bak "s/go-base-ms/$PROJECT_NAME/g" {} \;
+    find . -name "*.bak" -delete
+    
+    # Replace instances of display name (Go Base Microservice)
+    find . -type f \( -name "*.go" -o -name "*.yaml" -o -name "*.yml" -o -name "*.md" -o -name "*.json" \) \
+        -exec sed -i.bak "s/Go Base Microservice/$PROJECT_DISPLAY_NAME/g" {} \;
+    find . -name "*.bak" -delete
+    
     print_success "Go module updated to $MODULE_NAME"
+    print_success "Replaced GitHub username: DKS0523168 → $GITHUB_USERNAME"
+    print_success "Replaced project name: go-base-ms → $PROJECT_NAME"
+    print_success "Replaced display name: Go Base Microservice → $PROJECT_DISPLAY_NAME"
 }
 
 # Remove PostgreSQL dependencies
@@ -345,41 +338,18 @@ update_project_files() {
     
     # Generate README from template
     export PROJECT_NAME="$PROJECT_NAME"
+    export PROJECT_DISPLAY_NAME="$PROJECT_DISPLAY_NAME"
     export PROJECT_DESCRIPTION="$PROJECT_DESCRIPTION"
     export USE_POSTGRES="$USE_POSTGRES"
     export USE_KAFKA="$USE_KAFKA"
     export USE_SCHEMA_REGISTRY="$USE_SCHEMA_REGISTRY"
     ./scripts/generate-readme.sh
     
-    # Update .goreleaser.yaml
-    sed -i.bak "s/project_name: go-base-ms/project_name: $PROJECT_NAME/g" .goreleaser.yaml
-    rm .goreleaser.yaml.bak
-    
-    # Update Dockerfile
-    sed -i.bak "s/go-base-ms/$PROJECT_NAME/g" Dockerfile Dockerfile.goreleaser
-    rm Dockerfile.bak Dockerfile.goreleaser.bak
-    
-    # Update Makefile
-    sed -i.bak "s/BINARY_NAME=go-base-ms/BINARY_NAME=$PROJECT_NAME/g" Makefile
-    sed -i.bak "s/DOCKER_IMAGE=go-base-ms/DOCKER_IMAGE=$PROJECT_NAME/g" Makefile
-    rm Makefile.bak
-    
-    # Update docker-compose.yml
-    sed -i.bak "s/go-base-ms/$PROJECT_NAME/g" docker-compose.yml
-    rm docker-compose.yml.bak
-    
-    # Update OpenAPI spec
+    # Regenerate OpenAPI spec after replacements
     if [[ -f "api/openapi/base.yaml" ]]; then
-        sed -i.bak "s/Go Base Microservice/$PROJECT_NAME/g" api/openapi/base.yaml
-        sed -i.bak "s/A minimal Go microservice template.*/$PROJECT_DESCRIPTION/g" api/openapi/base.yaml
-        rm api/openapi/base.yaml.bak
-        # Regenerate merged spec
+        # Regenerate merged spec with updated names
         ./scripts/merge-openapi.sh >/dev/null 2>&1 || echo "Warning: Could not regenerate OpenAPI spec"
     fi
-    
-    # Update k8s manifests
-    sed -i.bak "s/go-base-ms/$PROJECT_NAME/g" k8s/deployment.yaml
-    rm k8s/deployment.yaml.bak
     
     print_success "Project files updated with $PROJECT_NAME"
 }
@@ -396,7 +366,7 @@ init_git_repository() {
     # Initialize new git repository
     git init
     git add .
-    git commit -m "feat: initial commit of $PROJECT_NAME
+    git commit -m "feat: initial commit of $PROJECT_DISPLAY_NAME ($PROJECT_NAME)
     
 Generated from go-base-ms template with:
 - PostgreSQL: $([ "$USE_POSTGRES" == true ] && echo "enabled" || echo "disabled")
@@ -492,7 +462,7 @@ show_final_instructions() {
     echo -e "${GREEN}║                                                            ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${CYAN}Your project '$PROJECT_NAME' is ready!${NC}"
+    echo -e "${CYAN}Your project '$PROJECT_DISPLAY_NAME' ($PROJECT_NAME) is ready!${NC}"
     echo ""
     echo -e "${BLUE}Next steps:${NC}"
     echo "1. Start development environment:"
