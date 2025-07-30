@@ -41,8 +41,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
+    - name: Configure Git for private modules
+      run: git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      if: github.event.repository.private == true
+
     - name: Download dependencies
       run: make deps
+      env:
+        GOPRIVATE: github.com/${{ github.repository_owner }}/*
 
     - name: Format check
       run: |

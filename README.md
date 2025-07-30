@@ -139,6 +139,30 @@ Each generated project includes:
 - **Development Guide**: Local setup, testing, and deployment instructions
 - **Environment Variables**: Complete configuration reference
 
+## 🔒 Private Repository Support
+
+When using this template to create a private repository, the GitHub Actions workflows are automatically configured to handle private Go module dependencies.
+
+### How It Works
+
+The workflows include:
+
+1. **Git Configuration for Private Modules**: Automatically configures Git to use the GitHub token for authentication when the repository is private
+2. **GOPRIVATE Environment Variable**: Sets the `GOPRIVATE` variable to mark your modules as private
+
+### Important Notes
+
+- The `GITHUB_TOKEN` is automatically provided by GitHub Actions
+- Configuration only applies to private repositories
+- No manual setup required - it works out of the box
+
+### Troubleshooting Private Repos
+
+If you encounter authentication issues:
+1. Ensure GitHub Actions has access to your repository
+2. Check that the `GITHUB_TOKEN` has necessary permissions
+3. For cross-repository dependencies, consider using a Personal Access Token (PAT) with `repo` scope
+
 ## 🤝 Contributing
 
 1. Fork this template repository

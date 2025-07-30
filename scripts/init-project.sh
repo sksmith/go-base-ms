@@ -183,17 +183,20 @@ collect_user_input() {
 update_go_mod() {
     print_step "Updating Go module and replacing template references"
     
+    # First, detect the current module name from go.mod
+    CURRENT_MODULE=$(grep "^module " go.mod | awk '{print $2}')
+    
     # Update go.mod
-    sed -i.bak "s|module github.com/dks0523168/go-base-ms|module $MODULE_NAME|g" go.mod
+    sed -i.bak "s|module $CURRENT_MODULE|module $MODULE_NAME|g" go.mod
     rm go.mod.bak
     
-    # Update all import statements in Go files
-    find . -name "*.go" -type f -exec sed -i.bak "s|github.com/dks0523168/go-base-ms|$MODULE_NAME|g" {} \;
+    # Update all import statements in Go files (replace current module with new module)
+    find . -name "*.go" -type f -exec sed -i.bak "s|$CURRENT_MODULE|$MODULE_NAME|g" {} \;
     find . -name "*.go.bak" -delete
     
     # Replace all instances of hardcoded GitHub username
     find . -type f \( -name "*.go" -o -name "*.yaml" -o -name "*.yml" -o -name "*.md" -o -name "*.json" -o -name "Dockerfile*" \) \
-        -exec sed -i.bak "s/DKS0523168/$GITHUB_USERNAME/g" {} \;
+        -exec sed -i.bak "s/sksmith/$GITHUB_USERNAME/g" {} \;
     find . -name "*.bak" -delete
     
     # Replace all instances of technical project name
@@ -206,8 +209,8 @@ update_go_mod() {
         -exec sed -i.bak "s/Go Base Microservice/$PROJECT_DISPLAY_NAME/g" {} \;
     find . -name "*.bak" -delete
     
-    print_success "Go module updated to $MODULE_NAME"
-    print_success "Replaced GitHub username: DKS0523168 → $GITHUB_USERNAME"
+    print_success "Go module updated: $CURRENT_MODULE → $MODULE_NAME"
+    print_success "Replaced GitHub username: sksmith → $GITHUB_USERNAME"
     print_success "Replaced project name: go-base-ms → $PROJECT_NAME"
     print_success "Replaced display name: Go Base Microservice → $PROJECT_DISPLAY_NAME"
 }
