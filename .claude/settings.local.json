@@ -21,7 +21,8 @@
       "Bash(./scripts/merge-openapi.sh:*)",
       "Bash(make:*)",
       "Bash(source:*)",
-      "Bash(kebab_to_title:*)"
+      "Bash(kebab_to_title:*)",
+      "Bash(gofmt:*)"
     ],
     "deny": []
   }

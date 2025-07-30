@@ -13,7 +13,7 @@ func TestLoad(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "default values",
+			name: "default values",
 			envVars: map[string]string{
 				"DB_PASSWORD": "", // Explicitly clear this env var
 			},
