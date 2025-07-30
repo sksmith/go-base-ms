@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sksmith/go-base-ms/internal/config"
 	_ "github.com/lib/pq"
+	"github.com/sksmith/go-base-ms/internal/config"
 )
 
 type DB struct {
