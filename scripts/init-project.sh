@@ -219,8 +219,9 @@ remove_postgres_support() {
     # Remove PostgreSQL dependency from go.mod
     go mod edit -droprequire github.com/lib/pq
     
-    # Remove database files
+    # Remove database files and directory
     rm -rf internal/db/
+    print_success "Removed internal/db/ directory"
     
     # Update main.go to remove database initialization
     sed -i.bak '/database/d; /db\./d; /DB/d' cmd/server/main.go
@@ -263,8 +264,9 @@ remove_kafka_support() {
     # Remove Kafka dependencies from go.mod
     go mod edit -droprequire github.com/confluentinc/confluent-kafka-go/v2
     
-    # Remove kafka files
+    # Remove kafka files and directory
     rm -rf internal/kafka/
+    print_success "Removed internal/kafka/ directory"
     
     # Update main.go to remove kafka initialization
     sed -i.bak '/kafka/d; /Kafka/d; /KAFKA/d' cmd/server/main.go
@@ -439,18 +441,56 @@ finalize_project() {
         print_warning "Some tests failed. This might be expected if external services are not running."
     fi
     
-    # Remove the init script and template-specific files
+    print_step "Cleaning up template files"
+    
+    # Remove all template-related files and scripts
     rm -f scripts/init-project.sh
     rm -f scripts/init-release.sh
     rm -f scripts/generate-readme.sh
+    rm -f scripts/utils.sh
     rm -rf templates/
     
-    # Update the scripts directory or remove if empty
-    if [[ -d "scripts" && ! "$(ls -A scripts)" ]]; then
-        rmdir scripts
+    # Clean up scripts directory if empty, otherwise keep merge-openapi.sh
+    if [[ -d "scripts" ]]; then
+        if [[ ! "$(ls -A scripts)" ]]; then
+            rmdir scripts
+            print_success "Removed empty scripts directory"
+        else
+            print_success "Kept scripts directory with remaining utility scripts"
+        fi
     fi
     
-    print_success "Project initialization completed"
+    # Reset CHANGELOG.md with a simple initial entry
+    cat > CHANGELOG.md << 'EOF'
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Initial project setup
+
+## [0.1.0] - $(date +%Y-%m-%d)
+
+### Added
+- Basic HTTP server with health endpoints
+- Structured logging with slog
+- OpenAPI 3.0 specification
+- Docker support with multi-stage builds
+- Kubernetes deployment manifests
+- GoReleaser configuration for automated releases
+EOF
+    
+    # Replace the date placeholder
+    sed -i.bak "s/\$(date +%Y-%m-%d)/$(date +%Y-%m-%d)/g" CHANGELOG.md
+    rm CHANGELOG.md.bak
+    
+    print_success "Reset CHANGELOG.md with initial project entry"
+    print_success "Project template cleanup completed"
 }
 
 # Display final instructions
