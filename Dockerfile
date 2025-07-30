@@ -2,7 +2,7 @@
 FROM golang:1.24.5-alpine3.22 AS builder
 
 # Install build dependencies and update packages
-RUN apk update && apk upgrade && apk add --no-cache git make
+RUN apk update && apk upgrade && apk add --no-cache git make gcc musl-dev librdkafka-dev pkgconf
 
 # Set working directory
 WORKDIR /build
@@ -17,13 +17,13 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o go-base-ms cmd/server/main.go
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o go-base-ms cmd/server/main.go
 
 # Runtime stage
 FROM alpine:3.22
 
 # Update and install runtime dependencies
-RUN apk update && apk upgrade && apk add --no-cache ca-certificates tzdata
+RUN apk update && apk upgrade && apk add --no-cache ca-certificates tzdata librdkafka
 
 # Create non-root user
 RUN addgroup -g 1000 -S appgroup && \
